@@ -19,22 +19,28 @@ namespace EducationalProgramBuilder
 
         public void SetDuration(int weeks)
         {
+            if (weeks <= 0)
+                throw new ArgumentException("Тривалість навчання має бути більше 0.");
             DurationInWeeks = weeks;
         }
 
         public void SetDifficultyLevel(string difficulty)
         {
+            if (string.IsNullOrEmpty(difficulty))
+                throw new ArgumentException("Рівень складності не може бути порожнім.");
             DifficultyLevel = difficulty;
         }
 
         public void AddSubject(string subject)
         {
+            if (string.IsNullOrEmpty(subject))
+                throw new ArgumentException("Назва предмета не може бути порожньою.");
             Subjects.Add(subject);
         }
 
         public void ShowDetails()
         {
-            Console.WriteLine("Освітня програма:");
+            Console.WriteLine("\n=== Освітня програма ===");
             Console.WriteLine($"Тривалість: {DurationInWeeks} тижнів");
             Console.WriteLine($"Рівень складності: {DifficultyLevel}");
             Console.WriteLine("Предмети:");
@@ -68,7 +74,7 @@ namespace EducationalProgramBuilder
             Reset();
         }
 
-        public void Reset()
+        private void Reset()
         {
             _program = new EducationalProgram();
         }
@@ -90,14 +96,14 @@ namespace EducationalProgramBuilder
 
         public EducationalProgram Build()
         {
-            EducationalProgram result = _program;
+            var result = _program;
             Reset();
             return result;
         }
     }
 
     /// <summary>
-    /// Клас-директор для керування створенням програм.
+    /// Клас-директор для керування створенням освітньої програми.
     /// </summary>
     public class EducationalProgramDirector
     {
@@ -110,41 +116,70 @@ namespace EducationalProgramBuilder
 
         public void ConstructBasicProgram()
         {
-            _builder.SetDuration(4);
+            _builder.SetDuration(8);
             _builder.SetDifficultyLevel("Базовий");
             _builder.AddSubject("Математика");
-            _builder.AddSubject("Інформатика");
+            _builder.AddSubject("Історія");
         }
 
         public void ConstructAdvancedProgram()
         {
-            _builder.SetDuration(12);
-            _builder.SetDifficultyLevel("Просунутий");
-            _builder.AddSubject("Алгоритми та структури даних");
-            _builder.AddSubject("Штучний інтелект");
+            _builder.SetDuration(16);
+            _builder.SetDifficultyLevel("Складний");
+            _builder.AddSubject("Алгоритми");
             _builder.AddSubject("Машинне навчання");
+            _builder.AddSubject("Фізика");
         }
     }
 
-    class Program
+    /// <summary>
+    /// Головний клас програми.
+    /// </summary>
+    public class Program
     {
         static void Main(string[] args)
         {
-            // Створення будівельника та директора
+            // Створення будівельника
             var builder = new EducationalProgramBuilder();
+
+            // Побудова програми через директора
             var director = new EducationalProgramDirector(builder);
 
-            // Побудова базової програми
+            // Створення базової програми
+            Console.WriteLine("Створення базової програми...");
             director.ConstructBasicProgram();
             var basicProgram = builder.Build();
             basicProgram.ShowDetails();
 
-            Console.WriteLine();
-
-            // Побудова просунутої програми
+            // Створення просунутої програми
+            Console.WriteLine("\nСтворення просунутої програми...");
             director.ConstructAdvancedProgram();
             var advancedProgram = builder.Build();
             advancedProgram.ShowDetails();
+
+            // Побудова кастомної програми користувачем
+            Console.WriteLine("\nСтворення кастомної програми...");
+            Console.Write("Введіть тривалість навчання (у тижнях): ");
+            int duration = int.Parse(Console.ReadLine());
+
+            Console.Write("Введіть рівень складності (наприклад, Легкий, Середній, Складний): ");
+            string difficulty = Console.ReadLine();
+
+            builder.SetDuration(duration);
+            builder.SetDifficultyLevel(difficulty);
+
+            Console.WriteLine("Додайте предмети до програми. Для завершення введіть 'стоп'.");
+            while (true)
+            {
+                Console.Write("Введіть предмет: ");
+                string subject = Console.ReadLine();
+                if (subject.ToLower() == "стоп")
+                    break;
+                builder.AddSubject(subject);
+            }
+
+            var customProgram = builder.Build();
+            customProgram.ShowDetails();
         }
     }
 }
